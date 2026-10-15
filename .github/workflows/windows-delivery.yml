@@ -1,0 +1,79 @@
+name: Build and deliver Windows Agent
+on:
+  push:
+    branches: [delivery/windows-agent-20261015]
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: windows-agent-delivery
+  cancel-in-progress: false
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run test:unit
+      - run: npm run package:portable
+      - name: Verify packaged application
+        run: node scripts/verify-package.mjs release/win-unpacked
+      - name: Prepare checksum and launch instructions
+        shell: pwsh
+        run: |
+          $file = 'release/AI-Drama-Agent-Windows-x64.exe'
+          if (!(Test-Path $file)) { throw 'Portable executable missing' }
+          $digest = (Get-FileHash $file -Algorithm SHA256).Hash.ToLowerInvariant()
+          "$digest  AI-Drama-Agent-Windows-x64.exe" | Set-Content release/SHA256SUMS-Windows.txt -Encoding utf8
+          Copy-Item docs/desktop-launch.md release/Windows-Launch-Guide.md
+      - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
+        with:
+          name: windows-agent-delivery
+          compression-level: 0
+          retention-days: 14
+          if-no-files-found: error
+          path: |
+            release/AI-Drama-Agent-Windows-x64.exe
+            release/SHA256SUMS-Windows.txt
+            release/Windows-Launch-Guide.md
+  publish:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093
+        with:
+          name: windows-agent-delivery
+          path: release
+      - name: Publish Windows download
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          DELIVERY_SHA: ${{ github.sha }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag='windows-v0.1.0-20261015'
+          cat > /tmp/windows-release-notes.md <<'NOTES'
+          Windows 64位单文件免安装开发版。下载 AI-Drama-Agent-Windows-x64.exe，保存到桌面后双击。
+
+          支持五幕14步人工制作工作台、本地项目、素材、字幕、备份与发行包。AI模型自动生成和平台自动发布尚未接入。
+
+          开发版未签署；免安装版不注册 .aidrama 文件关联，请在程序内打开项目。此流水线在 Windows 构建并运行单元测试，不等于人工桌面验收。
+          NOTES
+          if ! gh release view "$tag" >/dev/null 2>&1; then
+            gh release create "$tag" --target "$DELIVERY_SHA" --title 'Windows Agent 0.1.0 — 单文件启动版' --notes-file /tmp/windows-release-notes.md --draft --prerelease
+          fi
+          gh release upload "$tag" release/AI-Drama-Agent-Windows-x64.exe release/SHA256SUMS-Windows.txt release/Windows-Launch-Guide.md --clobber
+          gh release edit "$tag" --draft=false --prerelease --notes-file /tmp/windows-release-notes.md
+          gh release view "$tag" --json url --jq .url
