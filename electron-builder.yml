@@ -1,0 +1,39 @@
+appId: studio.aidrama.desktop
+productName: AI Drama Studio
+copyright: Copyright © 2026 AI Drama Studio
+asar: true
+npmRebuild: false
+buildDependenciesFromSource: false
+directories:
+  output: release
+  buildResources: build
+files:
+  - out/**/*
+  - package.json
+  - '!node_modules/**/{test,tests,docs,example,examples}/**'
+asarUnpack:
+  - node_modules/better-sqlite3/prebuilds/**
+  - node_modules/ffprobe-static/bin/**
+fileAssociations:
+  - ext: aidrama
+    name: AI Drama Project
+    description: AI Drama Studio project
+    role: Editor
+    icon: icon
+win:
+  target: [nsis, zip]
+  icon: build/icon.ico
+  signAndEditExecutable: false
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+mac:
+  target: [dmg, zip]
+  category: public.app-category.video
+  icon: build/icon.icns
+  identity: null
+linux:
+  target: [dir]
+  category: AudioVideo
+  icon: build/icon.png
