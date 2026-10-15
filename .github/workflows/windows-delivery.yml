@@ -23,6 +23,7 @@ jobs:
       - run: npm ci
       - run: npm run typecheck
       - run: npm run test:unit
+      - run: node --test scripts/package-path.test.mjs
       - run: npm run package:portable
       - name: Verify packaged application
         run: node scripts/verify-package.mjs release/win-unpacked
