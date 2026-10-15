@@ -523,8 +523,9 @@ export function App() {
                     <div>
                       <strong>你的工具，由你決定。</strong>
                       <p>
-                        第一期支援工作檔匯出與人工製作。第三方 API
-                        尚未接入；工具能力與授權需要依官方文件確認。
+                        支援人工製作及按需預留 AI
+                        模型接口。可在「管理工具」配置地址和模型，再於製作步驟選擇。
+                        預留接口尚未連接服務商；工具能力與授權需要依官方文件確認。
                       </p>
                     </div>
                   </div>
@@ -535,10 +536,21 @@ export function App() {
                         <div className="catalog-card" key={t.id}>
                           <div className="catalog-top">
                             <div className="tool-symbol">{t.name.slice(0, 1)}</div>
-                            <span className="badge">{t.id === 'manual' ? '本機' : '待查證'}</span>
+                            <span className="badge">
+                              {t.mode === 'api-reserved'
+                                ? '待接入'
+                                : t.id === 'manual'
+                                  ? '本機'
+                                  : '待查證'}
+                            </span>
                           </div>
                           <h3>{t.name}</h3>
-                          <p>{t.category} · 人工操作</p>
+                          <p>
+                            {t.category} ·{' '}
+                            {t.mode === 'api-reserved'
+                              ? `AI 接口預留 · ${t.api?.model || '模型待選擇'}`
+                              : '人工操作'}
+                          </p>
                           <div className="catalog-bottom">
                             <small>{t.steps.length} 個適用步驟</small>
                             {t.url && (

@@ -39,10 +39,28 @@ test('desktop project creation, fourteen-step canvas, edits, Arabic subtitles an
     await page.getByRole('button', { name: '選擇儲存位置並建立 ↗' }).click();
     await expect(page.locator('.flow-card')).toHaveCount(14);
     console.log('Canvas ready');
+    await page.getByRole('button', { name: '管理工具', exact: true }).click();
+    await page.getByLabel('使用方式').selectOption('api-reserved');
+    await page.getByLabel('工具名稱').fill('按需文字模型');
+    await page.getByLabel('適用步驟（逗號分隔，如 06,07）').fill('02,03,04');
+    await page.getByLabel('API 基礎地址（可稍後填寫）').fill('https://example.com/v1');
+    await page.getByLabel('模型 ID／工作流 ID（可稍後填寫）').fill('future-model');
+    await page.getByRole('button', { name: '儲存工具', exact: true }).click();
+    await expect(page.locator('.tool-list')).toContainText('按需文字模型');
+    await page.locator('.modal-close').click();
     await page
       .locator('.flow-card')
       .filter({ has: page.getByRole('heading', { name: '題材定位', exact: true }) })
       .click();
+    await page.getByRole('button', { name: '工具', exact: true }).click();
+    await page
+      .locator('.tool-row')
+      .filter({ hasText: '按需文字模型' })
+      .getByRole('button', { name: '選擇', exact: true })
+      .click();
+    await expect(page.locator('.callout')).toContainText('future-model');
+    await expect(page.locator('.callout')).toContainText('尚不會發送生成請求');
+    await page.getByRole('button', { name: '工作內容', exact: true }).click();
     await page.getByLabel('劇名', { exact: true }).fill('月光下的第七封信');
     await page
       .getByLabel('一句話故事')
@@ -68,6 +86,9 @@ test('desktop project creation, fourteen-step canvas, edits, Arabic subtitles an
     await page.getByRole('button', { name: '02 題材定位', exact: true }).click();
     await expect(page.getByLabel('劇名', { exact: true })).toHaveValue('月光下的第七封信');
     await expect(page.getByLabel('一句話故事')).toHaveValue(/修復師/);
+    await page.getByRole('button', { name: '工具', exact: true }).click();
+    await expect(page.locator('.callout')).toContainText('按需文字模型');
+    await expect(page.locator('.callout')).toContainText('https://example.com/v1');
     expect(errors).toEqual([]);
     const closed = app.waitForEvent('close', { timeout: 10000 });
     await app.evaluate(({ BrowserWindow }) => BrowserWindow.getAllWindows()[0].close());

@@ -296,7 +296,19 @@ export function StepWorkspace({
             <div className="callout">
               <span>目前使用</span>
               <h3>{tool.name}</h3>
-              <p>人工操作 · API 尚未接入。匯出提示詞與交付物後，可在工具中製作再匯入成果。</p>
+              {tool.mode === 'api-reserved' ? (
+                <>
+                  <p>AI 接口已預留 · 待接入驗證。尚不會發送生成請求。</p>
+                  <p>
+                    模型：{tool.api?.model || '製作時選擇'}
+                    <br />
+                    API 地址：{tool.api?.baseUrl || '製作時配置'}
+                  </p>
+                  <p>可在「管理生產工具」更新配置；目前可匯出提示詞並匯入製作成果。</p>
+                </>
+              ) : (
+                <p>人工操作 · API 尚未接入。匯出提示詞與交付物後，可在工具中製作再匯入成果。</p>
+              )}
             </div>
             <div className="tool-list">
               {tools
@@ -307,7 +319,12 @@ export function StepWorkspace({
                     <div>
                       <strong>{t.name}</strong>
                       <small>
-                        {t.category} · {t.id === 'manual' ? '本機編輯' : '能力待查證'}
+                        {t.category} ·{' '}
+                        {t.mode === 'api-reserved'
+                          ? `AI 接口待接入 · ${t.api?.model || '模型待選擇'}`
+                          : t.id === 'manual'
+                            ? '本機編輯'
+                            : '能力待查證'}
                       </small>
                     </div>
                     <button

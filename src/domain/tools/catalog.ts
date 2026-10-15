@@ -1,4 +1,14 @@
 import type { Row, ValidationIssue } from '../../shared/model';
+export const API_PROTOCOLS = {
+  'openai-compatible': 'OpenAI 相容介面',
+  'provider-specific': '供應商專用介面',
+  comfyui: 'ComfyUI 工作流',
+} as const;
+export type ApiReservation = {
+  protocol: keyof typeof API_PROTOCOLS;
+  baseUrl: string;
+  model: string;
+};
 export type ToolDefinition = {
   id: string;
   name: string;
@@ -6,7 +16,8 @@ export type ToolDefinition = {
   steps: string[];
   url: string;
   verification: 'unverified' | 'documented' | 'tested';
-  mode: 'manual' | 'api';
+  mode: 'manual' | 'api-reserved' | 'api';
+  api?: ApiReservation;
   checkedAt: string | null;
 };
 const entry = (
@@ -92,6 +103,26 @@ export function checkToolBinding(
 }
 export function validateCustomTool(row: Row): ValidationIssue[] {
   const issues: ValidationIssue[] = [];
+  if (row.mode && !['manual', 'api-reserved'].includes(row.mode))
+    issues.push({ code: 'MODE', message: '請選擇人工操作或預留 AI 接口' });
+  if (Object.keys(row).some((key) => /key|token|secret|password|authorization/i.test(key)))
+    issues.push({ code: 'SECRET', message: '工具設定不接受 API 金鑰或憑證' });
+  if (row.mode === 'api-reserved') {
+    if (!Object.hasOwn(API_PROTOCOLS, row.apiProtocol ?? ''))
+      issues.push({ code: 'PROTOCOL', message: '請選擇接口類型' });
+    if (row.apiBaseUrl) {
+      try {
+        const u = new URL(row.apiBaseUrl);
+        if (u.protocol !== 'https:' || u.username || u.password || u.search || u.hash)
+          throw Error();
+      } catch {
+        issues.push({
+          code: 'API_URL',
+          message: 'API 地址須為 HTTPS，不含帳密、查詢參數或片段；也可留空稍後配置',
+        });
+      }
+    }
+  }
   if (!row.id || !row.name?.trim()) issues.push({ code: 'TOOL', message: '工具名稱不可空白' });
   if (row.url) {
     try {
@@ -119,7 +150,16 @@ export function getTools(rows: Row[] = []): ToolDefinition[] {
       category: row.category || '自訂',
       steps: row.steps.split(',').map((k) => k.trim()),
       url: row.url || '',
-      mode: 'manual',
+      mode: row.mode === 'api-reserved' ? 'api-reserved' : 'manual',
+      ...(row.mode === 'api-reserved'
+        ? {
+            api: {
+              protocol: row.apiProtocol as ApiReservation['protocol'],
+              baseUrl: row.apiBaseUrl || '',
+              model: row.apiModel || '',
+            },
+          }
+        : {}),
       verification: 'unverified',
       checkedAt: null,
     });

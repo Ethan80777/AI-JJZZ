@@ -67,16 +67,18 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          tag='windows-v0.1.0-20261015'
+          tag='windows-v0.1.1-20261015'
           cat > /tmp/windows-release-notes.md <<'NOTES'
           Windows 64位单文件免安装开发版。下载 AI-Drama-Agent-Windows-x64.exe，保存到桌面后双击。
 
           支持五幕14步人工制作工作台、本地项目、素材、字幕、备份与发行包。AI模型自动生成和平台自动发布尚未接入。
 
+          新增按需 AI 接口预留：在管理工具中配置接口类型、API 地址及模型 ID，并分配到制作步骤。配置可稍后填写，不收集密钥、不发起付费请求。
+
           开发版未签署；免安装版不注册 .aidrama 文件关联，请在程序内打开项目。此流水线在 Windows 构建并运行单元测试，不等于人工桌面验收。
           NOTES
           if ! gh release view "$tag" >/dev/null 2>&1; then
-            gh release create "$tag" --target "$DELIVERY_SHA" --title 'Windows Agent 0.1.0 — 单文件启动版' --notes-file /tmp/windows-release-notes.md --draft --prerelease
+            gh release create "$tag" --target "$DELIVERY_SHA" --title 'Windows Agent 0.1.1 — AI接口预留版' --notes-file /tmp/windows-release-notes.md --draft --prerelease
           fi
           gh release upload "$tag" release/AI-Drama-Agent-Windows-x64.exe release/SHA256SUMS-Windows.txt release/Windows-Launch-Guide.md --clobber
           gh release edit "$tag" --draft=false --prerelease --notes-file /tmp/windows-release-notes.md
