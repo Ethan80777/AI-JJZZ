@@ -15,3 +15,5 @@
 封裝後的 Linux 應用另通過1項完整 E2E：直接執行 `release/linux-unpacked/ai-drama-studio`，驗證封裝內 SQLite／ffprobe、14步、G1–G8、發行包、備份恢復及重開 hash。套件檢查另比對 main／preload／renderer 與當前 build 位元內容，避免舊產物冒充新驗證。
 
 最終產物：Windows x64 ZIP 與 macOS arm64 ZIP 的建置命令皆 exit 0，ZIP 全項 CRC 檢查通過；SHA-256 清單在 `release/SHA256SUMS.txt`。兩平台 unpacked 套件的 main／preload／renderer 均與目前 build 相同。這些是開發版產物，非原生安裝驗收結果。
+
+Windows 單檔免安裝版補充：`electron-builder --win portable --x64` exit 0，產生 `AI-Drama-Agent-Windows-x64.exe`（180,367,652 bytes）。NSIS 外層與內含 app-64.7z 均經 7-Zip 完整性測試。使用 portable target 不需執行建立 uninstaller 的 Wine 步驟。外層為32位 NSIS啟動器，內含 x64 Electron 工作台。未新增 Windows 實機啟動驗證，免安裝版也不安裝 `.aidrama` 文件關聯。

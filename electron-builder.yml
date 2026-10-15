@@ -37,3 +37,5 @@ linux:
   target: [dir]
   category: AudioVideo
   icon: build/icon.png
+portable:
+  artifactName: AI-Drama-Agent-Windows-x64.exe

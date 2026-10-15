@@ -20,7 +20,8 @@
     "postinstall": "node node_modules/electron/install.js",
     "format": "prettier --write src tests *.ts *.mts *.json",
     "format:check": "prettier --check src tests",
-    "verify": "npm run typecheck && npm test && npm run build"
+    "verify": "npm run typecheck && npm test && npm run build",
+    "package:portable": "npm run build && electron-builder --win portable --x64"
   },
   "dependencies": {
     "@xyflow/react": "^12.12.0",

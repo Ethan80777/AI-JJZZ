@@ -6,6 +6,8 @@ Windows／macOS 桌面劇集製作工作台，Electron + React + SQLite。五幕
 
 ## 開始使用
 
+Windows 單檔免安裝版：下載 `AI-Drama-Agent-Windows-x64.exe`，存到桌面後雙擊。無需 Node.js 或手動解壓。詳見 [雙擊啟動說明](docs/desktop-launch.md)。
+
 安裝後開啟 AI Drama Studio，選擇「建立第一個劇集」，指定儲存位置。點擊畫布節點，或展開左側步驟清單。內容自動保存；「儲存工作」也會重新確認最新上游引用。必要關卡在「檢查」頁審核，尚未完成的草稿可以保存。
 
 - **專案檔**：`名稱.aidrama` 與同目錄的 `名稱.assets/` 必須一起保留。後者包含資料庫、原始素材與備份。只搬移 `.aidrama` 會找不到內容。
@@ -33,6 +35,7 @@ npm run test:e2e
 ## 桌面打包
 
 ```sh
+npm run package:portable  # Windows 單檔免安裝 EXE
 npm run package:win  # Windows NSIS + ZIP
 npm run package:mac  # macOS DMG + ZIP（在 macOS 執行）
 npm run package:dir  # 當前平台 unpacked 應用程式
