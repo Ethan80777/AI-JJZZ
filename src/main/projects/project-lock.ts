@@ -1,0 +1,3 @@
+import fs from 'node:fs';import path from 'node:path';import {uid} from '../../shared/model';
+export function acquireLock(root:string):()=>void{const file=path.join(root,'.writer-lock');const token=uid();if(fs.existsSync(file)){try{const old=JSON.parse(fs.readFileSync(file,'utf8'));if(!Number.isInteger(old.pid)||old.pid<=0)throw Error('PROJECT_BUSY');try{process.kill(old.pid,0);throw Error('PROJECT_BUSY');}catch(e){if((e as NodeJS.ErrnoException).code!=='ESRCH')throw Error('PROJECT_BUSY');}fs.unlinkSync(file);}catch{throw Error('PROJECT_BUSY');}}
+fs.writeFileSync(file,JSON.stringify({pid:process.pid,token}),{flag:'wx',mode:0o600});return ()=>{try{if(JSON.parse(fs.readFileSync(file,'utf8')).token===token)fs.unlinkSync(file);}catch{/* lock already removed */}};}
