@@ -13,3 +13,5 @@
 測試夾具由本機 FFmpeg 合成純色影像與正弦音頻，故事與字幕為明示的原創驗收示例。沒有使用受限制的外部影音。
 
 封裝後的 Linux 應用另通過1項完整 E2E：直接執行 `release/linux-unpacked/ai-drama-studio`，驗證封裝內 SQLite／ffprobe、14步、G1–G8、發行包、備份恢復及重開 hash。套件檢查另比對 main／preload／renderer 與當前 build 位元內容，避免舊產物冒充新驗證。
+
+最終產物：Windows x64 ZIP 與 macOS arm64 ZIP 的建置命令皆 exit 0，ZIP 全項 CRC 檢查通過；SHA-256 清單在 `release/SHA256SUMS.txt`。兩平台 unpacked 套件的 main／preload／renderer 均與目前 build 相同。這些是開發版產物，非原生安裝驗收結果。
