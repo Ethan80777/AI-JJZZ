@@ -24,9 +24,12 @@ jobs:
       - run: npm run typecheck
       - run: npm run test:unit
       - run: node --test scripts/package-path.test.mjs
-      - run: npm run package:portable
+      - run: npm run build
+      - run: npx electron-builder --win --x64 --dir
       - name: Verify packaged application
         run: node scripts/verify-package.mjs release/win-unpacked
+      - name: Build single-file launcher from verified package
+        run: npx electron-builder --win portable --x64 --prepackaged release/win-unpacked
       - name: Prepare checksum and launch instructions
         shell: pwsh
         run: |
